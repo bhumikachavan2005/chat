@@ -1,0 +1,30 @@
+# Private WhatsApp Archive - Ignore list
+# Ensure private chat databases and personal files are never committed to Git
+
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.enc
+*.bak
+backups/
+# Chat exports (ignore temporary txt exports except main archive export)
+*.txt
+!WhatsApp Chat with Vinu💝🎀.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

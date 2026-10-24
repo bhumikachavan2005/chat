@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vinu 💝 × Bhuu 🎀 | Private Friendship Archive</title>
+  <meta name="description" content="100% Private, Secure, Local WhatsApp Friendship Archive between Vinu and Bhuu.">
+  <link rel="stylesheet" href="/static/css/style.css?v=2.6">
+</head>
+<body>
+
+  <!-- ==================== AUTH / LOCK SCREEN ==================== -->
+  <div id="lockScreen" class="lock-screen active">
+    <div class="lock-card">
+      <div class="lock-badge">🔐 Private Archive</div>
+      <h1 class="lock-title">Vinu 💝 × Bhuu 🎀</h1>
+      <p class="lock-subtitle">Our Story • End-to-End Encrypted Friendship Archive</p>
+
+      <!-- Server Connection Notice if Offline -->
+      <div id="serverOfflineBanner" class="auth-error hidden" style="margin-bottom:1rem;background:rgba(239,68,68,0.18);border:1px solid #ef4444;color:#fca5a5;padding:0.75rem;border-radius:var(--radius-sm);font-size:0.85rem;text-align:center;line-height:1.4;">
+        ⚠️ Local server is not running.<br>Please double-click <strong>start.bat</strong> in your project folder to start the archive.
+      </div>
+
+      <!-- First-time Setup Form -->
+      <form id="setupForm" class="auth-form hidden">
+        <div class="setup-notice">
+          <span>✨ Welcome! Set your master password to protect your private archive.</span>
+        </div>
+        <div class="input-group">
+          <label for="setupPassword">Create Master Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="setupPassword" placeholder="Enter a secure password..." required minlength="4" autocomplete="new-password">
+            <button type="button" class="btn-toggle-pwd" data-target="setupPassword" title="Show/Hide Password">👁️</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="setupPasswordConfirm">Confirm Master Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="setupPasswordConfirm" placeholder="Re-enter password..." required minlength="4" autocomplete="new-password">
+            <button type="button" class="btn-toggle-pwd" data-target="setupPasswordConfirm" title="Show/Hide Password">👁️</button>
+          </div>
+        </div>
+        <div id="setupError" class="auth-error hidden"></div>
+        <button type="submit" class="btn btn-primary btn-block">Set Password & Unlock</button>
+      </form>
+
+      <!-- Standard Unlock Form -->
+      <form id="loginForm" class="auth-form">
+        <div class="input-group">
+          <label for="loginPassword">Enter Master Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="loginPassword" placeholder="••••••••••••" required autocomplete="current-password" autofocus>
+            <button type="button" class="btn-toggle-pwd" data-target="loginPassword" title="Show/Hide Password">👁️</button>
+          </div>
+        </div>
+        <div id="loginError" class="auth-error hidden"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="btnUnlock">
+          <span>Unlock Archive</span> ➔
+        </button>
+      </form>
+
+      <div class="lock-footer">
+        <span>🛡️ 100% Local Storage • Zero External Tracking • Offline Ready</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN APPLICATION ==================== -->
+  <div id="appContainer" class="app-layout hidden">
+    
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-brand">
+        <div class="brand-avatar-pair">
+          <span class="avatar avatar-vinu" title="Vinu 💝">V</span>
+          <span class="avatar avatar-bhumi" title="Bhuu 🎀">B</span>
+        </div>
+        <div class="brand-text">
+          <h2 class="brand-title">Vinu 💝🎀 <span class="brand-cross">×</span> Bhuu 🎀</h2>
+          <span class="brand-badge" id="headerStatusBadge">17,000+ Messages • Nov 2025 – Aug 2026</span>
+        </div>
+      </div>
+
+      <!-- Main Navigation Tabs (Clean & Focused) -->
+      <nav class="nav-tabs" id="navTabs">
+        <button class="nav-tab active" data-tab="chat"><span class="tab-icon">💬</span> Chat</button>
+        <button class="nav-tab" data-tab="search"><span class="tab-icon">🔍</span> Search</button>
+        <button class="nav-tab" data-tab="timeline"><span class="tab-icon">🗓️</span> Timeline</button>
+        <button class="nav-tab" data-tab="memories">
+          <span class="tab-icon">❤️</span> Memories <span class="badge" id="navMemoryBadge">0</span>
+        </button>
+        <button class="nav-tab" data-tab="stats"><span class="tab-icon">📊</span> Statistics & Story</button>
+        <button class="nav-tab" data-tab="insights"><span class="tab-icon">🧠</span> Insights & Moments</button>
+        <button class="nav-tab" data-tab="settings"><span class="tab-icon">⚙️</span> Settings</button>
+      </nav>
+
+      <!-- Action Controls -->
+      <div class="header-actions">
+        <button id="btnOpenWrapped" class="btn btn-primary" title="Launch Friendship Wrapped Presentation" onclick="if(window.WrappedComponent) window.WrappedComponent.open(); else if(typeof WrappedComponent!=='undefined') WrappedComponent.open();">
+          <span>🎁 Wrapped</span>
+        </button>
+        <button id="themeToggle" class="btn btn-icon" title="Toggle Theme">
+          <span id="themeIcon">🌙</span>
+        </button>
+        <button id="btnLockNow" class="btn btn-danger-outline" title="Lock Archive Immediately">
+          <span>🔒 Lock</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Views Area -->
+    <main class="main-content">
+
+      <!-- 1. CHAT VIEW -->
+      <section id="view-chat" class="tab-view active">
+        <div class="chat-container">
+          
+          <!-- Chat Control Bar -->
+          <div class="chat-filter-bar">
+            <div class="filter-group">
+              <label>Sender:</label>
+              <select id="chatSenderFilter" class="select-input">
+                <option value="">All Senders</option>
+                <option value="vinu">Vinu 💝🎀</option>
+                <option value="bhuu">Bhuu 🎀</option>
+                <option value="system">System Events</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Date:</label>
+              <input type="date" id="chatDateJumpInput" class="date-input">
+              <button id="btnJumpToDate" class="btn btn-sm btn-secondary" title="Jump to start of this date and read onwards">Jump</button>
+              <button id="btnFilterDay" class="btn btn-sm btn-outline" title="Filter and read the 100% full chat for this single day">View Day</button>
+              <button id="btnClearDateFilter" class="btn btn-sm btn-outline hidden" title="Clear Date Filter and show all history">✕ Clear</button>
+            </div>
+
+            <div class="filter-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="chatMediaOnly"> 📎 Media Only
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="chatMemoriesOnly"> ⭐ Memories Only
+              </label>
+            </div>
+
+            <div class="filter-actions">
+              <button id="btnSurpriseMemory" class="btn btn-sm btn-primary" title="Jump to a Random Memory / Moment">🎲 Surprise Me</button>
+              <button id="btnJumpStart" class="btn btn-sm btn-outline" title="Jump to First Message">⏮ First</button>
+              <button id="btnJumpEnd" class="btn btn-sm btn-outline" title="Jump to Latest Message">Latest ⏭</button>
+            </div>
+          </div>
+
+          <!-- Active Filter Banner (if date filtered) -->
+          <div id="chatFilterBanner" class="chat-filter-banner hidden">
+            <span id="chatFilterBannerText">📅 Showing Full Day Chat</span>
+            <button id="btnDismissFilterBanner" class="btn btn-sm btn-outline">Show All History</button>
+          </div>
+
+          <!-- Quick Filter Pills -->
+          <div class="quick-pills-bar" id="quickPillsBar">
+            <button class="pill-btn active" data-preset="">All Messages</button>
+            <button class="pill-btn" data-preset="late_night">🌙 Late Night (11 PM - 5 AM)</button>
+            <button class="pill-btn" data-preset="long_messages">📜 Deep Messages (>25 words)</button>
+            <button class="pill-btn" data-preset="voice">🎵 Voice Notes</button>
+            <button class="pill-btn" data-preset="calls">📞 Calls & Logs</button>
+            <button class="pill-btn" data-preset="deleted">🚫 Deleted Messages</button>
+          </div>
+
+          <!-- Chat Messages Area -->
+          <div class="chat-viewport" id="chatViewport">
+            <div class="chat-messages" id="chatMessagesList">
+              <!-- Messages injected via JS -->
+            </div>
+            <div id="chatLoadingIndicator" class="chat-loading hidden">
+              <div class="spinner"></div> Loading messages...
+            </div>
+          </div>
+
+          <!-- Floating Scroll Bottom Button -->
+          <button id="btnScrollBottom" class="btn-scroll-bottom hidden" title="Scroll to bottom">
+            ↓
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. SEARCH VIEW -->
+      <section id="view-search" class="tab-view">
+        <div class="search-view-container">
+          <div class="search-header">
+            <h2>🔍 Powerful Full-Text Search</h2>
+            <p>Search across 17,000+ messages instantly using SQLite FTS5.</p>
+            <div class="search-bar-wrap">
+              <input type="text" id="searchInput" placeholder="Search keywords (e.g. internship, placement, birthday, sorry, haha)..." autofocus>
+              <button id="btnExecuteSearch" class="btn btn-primary">Search</button>
+            </div>
+            <div class="search-filters">
+              <select id="searchSenderFilter" class="select-input">
+                <option value="">All Senders</option>
+                <option value="vinu">Vinu 💝🎀</option>
+                <option value="bhuu">Bhuu 🎀</option>
+              </select>
+              <input type="date" id="searchStartDate" class="date-input" placeholder="From Date">
+              <input type="date" id="searchEndDate" class="date-input" placeholder="To Date">
+            </div>
+          </div>
+
+          <div class="search-results-info" id="searchResultsInfo">
+            <span>Enter a query above to search conversation history.</span>
+          </div>
+
+          <div class="search-results-list" id="searchResultsList">
+            <!-- Results injected here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. TIMELINE VIEW -->
+      <section id="view-timeline" class="tab-view">
+        <div class="timeline-view-container">
+          <div class="section-header">
+            <h2>🗓️ Friendship Timeline</h2>
+            <p>Browse the story month by month. Click any month to jump directly into the chat.</p>
+          </div>
+          <div class="timeline-tree" id="timelineTreeContainer">
+            <!-- Timeline cards injected here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. MEMORIES VIEW -->
+      <section id="view-memories" class="tab-view">
+        <div class="memories-view-container">
+          <div class="section-header-flex">
+            <div>
+              <h2>❤️ Memory Vault</h2>
+              <p>Special moments, emotional conversations, and friendship milestones.</p>
+            </div>
+          </div>
+
+          <!-- Memory Category Filter Tabs -->
+          <div class="memory-categories-bar" id="memoryCategoriesBar">
+            <!-- Injected via JS -->
+          </div>
+
+          <!-- Memory Search & List -->
+          <div class="memory-search-row">
+            <input type="text" id="memorySearchInput" placeholder="Filter memories by notes or text...">
+          </div>
+
+          <div class="memories-grid" id="memoriesGrid">
+            <!-- Memory cards injected here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. STATISTICS & STORY VIEW (With Sub-Categories) -->
+      <section id="view-stats" class="tab-view">
+        <div class="stats-view-container">
+          <div class="section-header">
+            <h2>📊 Factual Friendship Statistics</h2>
+            <p class="section-subtext">Measurable metrics, response speeds, milestones, and evolution calculated directly from chat records.</p>
+          </div>
+
+          <!-- Sub-Category Navigation Bar -->
+          <div class="sub-nav-bar" id="statsSubNav">
+            <button class="sub-nav-btn active" data-stats-sub="overview">📊 Overview & Trends</button>
+            <button class="sub-nav-btn" data-stats-sub="dynamics">⚡ Speed & Starters</button>
+            <button class="sub-nav-btn" data-stats-sub="milestones">🎖️ Milestones</button>
+            <button class="sub-nav-btn" data-stats-sub="evolution">📈 2025 vs 2026 Evolution</button>
+            <button class="sub-nav-btn" data-stats-sub="topics">🔤 Emojis & Words</button>
+          </div>
+
+          <!-- Sub-View 1: Overview & Trends -->
+          <div id="stats-sub-overview" class="stats-sub-view active">
+            <!-- Top Metric Cards -->
+            <div class="stats-cards-grid" id="statsTopCards"></div>
+
+            <!-- Charts Row 1: Split & Heatmap -->
+            <div class="charts-row">
+              <div class="chart-card">
+                <h3>💬 Message Share</h3>
+                <div class="chart-box" id="chartMessageSplit"></div>
+              </div>
+              <div class="chart-card">
+                <h3>🕒 24-Hour Chatting Rhythm</h3>
+                <div class="chart-box" id="chartHourlyHeatmap"></div>
+              </div>
+            </div>
+
+            <!-- Charts Row 2: Day of Week & Monthly Trend -->
+            <div class="charts-row">
+              <div class="chart-card">
+                <h3>📅 Activity by Day of Week</h3>
+                <div class="chart-box" id="chartDayOfWeek"></div>
+              </div>
+              <div class="chart-card">
+                <h3>📈 Monthly Volume Timeline</h3>
+                <div class="chart-box" id="chartMonthlyTrend"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub-View 2: Speed & Dynamics -->
+          <div id="stats-sub-dynamics" class="stats-sub-view">
+            <div class="stats-cards-grid" id="statsDynamicsCards"></div>
+          </div>
+
+          <!-- Sub-View 3: Milestones Ribbon -->
+          <div id="stats-sub-milestones" class="stats-sub-view">
+            <div class="chart-card" id="milestonesCard">
+              <h3>🎖️ Friendship Milestones & Badges</h3>
+              <div class="milestones-ribbon" id="milestonesRibbon"></div>
+            </div>
+          </div>
+
+          <!-- Sub-View 4: 2025 vs 2026 Evolution -->
+          <div id="stats-sub-evolution" class="stats-sub-view">
+            <div id="evolutionContent"></div>
+          </div>
+
+          <!-- Sub-View 5: Emojis & Topics -->
+          <div id="stats-sub-topics" class="stats-sub-view">
+            <div class="charts-row">
+              <div class="chart-card">
+                <h3>✨ Top Emojis Leaderboard</h3>
+                <div class="leaderboard-list" id="topEmojisList"></div>
+              </div>
+              <div class="chart-card">
+                <h3>🔤 Frequently Discussed Topics (Filtered)</h3>
+                <div class="word-cloud-list" id="topWordsList"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 6. INSIGHTS & MOMENTS VIEW (With Sub-Categories) -->
+      <section id="view-insights" class="tab-view">
+        <div class="insights-view-container">
+          <div class="section-header">
+            <h2>🧠 Insights & Moments Hub</h2>
+            <p class="section-subtext">100% Local AI Question-Answering, verified message receipts, and detected humor moments.</p>
+          </div>
+
+          <!-- Sub-Category Navigation Bar -->
+          <div class="sub-nav-bar" id="insightsSubNav">
+            <button class="sub-nav-btn active" data-insights-sub="qa">💡 Factual Q&A</button>
+            <button class="sub-nav-btn" data-insights-sub="funny">😂 Funny Moments Hub</button>
+          </div>
+
+          <!-- Sub-View 1: Factual Q&A -->
+          <div id="insights-sub-qa" class="insights-sub-view active">
+            <div class="insights-query-box">
+              <h3>Ask a Factual Question</h3>
+              <div class="search-bar-wrap">
+                <input type="text" id="customInsightInput" placeholder="e.g. When did we discuss exams? Or search any topic...">
+                <button id="btnAskInsight" class="btn btn-primary">Ask Offline</button>
+              </div>
+            </div>
+
+            <div class="prebuilt-insights-header">
+              <h3>Curated Friendship Questions</h3>
+            </div>
+            <div class="prebuilt-insights-grid" id="prebuiltInsightsGrid"></div>
+
+            <div id="insightAnswerContainer" class="insight-answer-container hidden"></div>
+          </div>
+
+          <!-- Sub-View 2: Funny Moments Hub -->
+          <div id="insights-sub-funny" class="insights-sub-view">
+            <div class="funny-grid" id="funnyMomentsGrid"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 7. SETTINGS VIEW -->
+      <section id="view-settings" class="tab-view">
+        <div class="settings-view-container">
+          <div class="section-header">
+            <h2>⚙️ Privacy, Security & Data Management</h2>
+            <p class="section-subtext">Manage local archive encryption, auto-lock timeouts, passwords, backups, and data lifecycle.</p>
+          </div>
+
+          <div class="settings-grid">
+            
+            <!-- Security & Auto-lock -->
+            <div class="settings-card">
+              <h3>🔒 Auto-Lock & Session Inactivity</h3>
+              <p>The archive automatically locks when no activity is detected.</p>
+              <form id="formAutoLock" class="settings-form">
+                <div class="input-group">
+                  <label for="selectLockTimeout">Inactivity Lock Timeout</label>
+                  <select id="selectLockTimeout" class="select-input">
+                    <option value="5">5 Minutes</option>
+                    <option value="15">15 Minutes (Default)</option>
+                    <option value="30">30 Minutes</option>
+                    <option value="60">1 Hour</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-secondary">Save Timeout</button>
+              </form>
+            </div>
+
+            <!-- Password Change -->
+            <div class="settings-card">
+              <h3>🔑 Change Master Password</h3>
+              <form id="formChangePassword" class="settings-form">
+                <div class="input-group">
+                  <label for="currentPasswordInput">Current Password</label>
+                  <input type="password" id="currentPasswordInput" required>
+                </div>
+                <div class="input-group">
+                  <label for="newPasswordInput">New Password</label>
+                  <input type="password" id="newPasswordInput" minlength="4" required>
+                </div>
+                <div id="changePasswordStatus" class="form-status hidden"></div>
+                <button type="submit" class="btn btn-secondary">Update Password</button>
+              </form>
+            </div>
+
+            <!-- Encrypted Backup Export -->
+            <div class="settings-card">
+              <h3>🛡️ AES-256-GCM Encrypted Backup</h3>
+              <p>Export a portable, authenticated encrypted backup of your entire chat archive and memories.</p>
+              <form id="formExportBackup" class="settings-form">
+                <div class="input-group">
+                  <label for="backupPassphraseInput">Backup Passphrase</label>
+                  <input type="password" id="backupPassphraseInput" placeholder="Passphrase to encrypt backup..." required minlength="4">
+                </div>
+                <button type="submit" class="btn btn-primary">Download Encrypted Backup (.enc)</button>
+              </form>
+            </div>
+
+            <!-- Encrypted Backup Restore -->
+            <div class="settings-card">
+              <h3>📥 Restore Encrypted Backup</h3>
+              <p>Restore chat history and memories from an existing AES-256-GCM backup file.</p>
+              <form id="formRestoreBackup" class="settings-form">
+                <div class="input-group">
+                  <label for="restoreFileInput">Backup File (.enc)</label>
+                  <input type="file" id="restoreFileInput" accept=".enc" required>
+                </div>
+                <div class="input-group">
+                  <label for="restorePassphraseInput">Passphrase</label>
+                  <input type="password" id="restorePassphraseInput" required>
+                </div>
+                <div id="restoreStatus" class="form-status hidden"></div>
+                <button type="submit" class="btn btn-secondary">Decrypt & Restore</button>
+              </form>
+            </div>
+
+            <!-- Import WhatsApp TXT -->
+            <div class="settings-card">
+              <h3>📄 Import / Re-parse WhatsApp TXT</h3>
+              <p>Re-import or update the archive from a raw WhatsApp export `.txt` file.</p>
+              <form id="formImportTxt" class="settings-form">
+                <div class="input-group">
+                  <label for="txtFileInput">Select WhatsApp .txt File</label>
+                  <input type="file" id="txtFileInput" accept=".txt" required>
+                </div>
+                <div id="importTxtStatus" class="form-status hidden"></div>
+                <button type="submit" class="btn btn-secondary">Parse & Import Chat</button>
+              </form>
+            </div>
+
+            <!-- Friendship Wrapped & Personal Photos Manager -->
+            <div class="settings-card" style="grid-column: 1 / -1;">
+              <div class="settings-card-header" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.6rem;">🎁</span>
+                <div>
+                  <h3 style="margin: 0;">Friendship Wrapped & Personal Photos</h3>
+                  <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Protect Wrapped with a private PIN & showcase your personal photos in your story.</p>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.25rem;">
+                
+                <!-- Secret PIN Box -->
+                <div style="background: var(--bg-surface-elevated); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                  <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span>🔒</span> Secret PIN Protection
+                  </h4>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Set a private PIN to prevent opening Wrapped without permission. Leave blank to disable PIN.
+                  </p>
+                  <form id="formSetWrappedPin" class="settings-form">
+                    <div class="input-group">
+                      <label for="wrappedPinInput">Set or Change Secret PIN</label>
+                      <input type="password" id="wrappedPinInput" placeholder="Enter 4-digit PIN or secret word..." autocomplete="off">
+                    </div>
+                    <div id="statusSetWrappedPin" class="form-status hidden"></div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.8rem;">
+                      <button type="submit" class="btn btn-primary btn-sm">Save PIN</button>
+                      <button type="button" id="btnRemoveWrappedPin" class="btn btn-danger-outline btn-sm">Remove PIN</button>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Personal Photo Uploader Box -->
+                <div style="background: var(--bg-surface-elevated); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                  <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span>📸</span> Add Personal Photo to Wrapped
+                  </h4>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Upload special photos of Vinu & Bhuu to appear seamlessly in your story slides.
+                  </p>
+                  <form id="formUploadWrappedPhoto" class="settings-form">
+                    <div class="input-group">
+                      <label for="wrappedPhotoFileInput">Select Image (JPG, PNG, WEBP)</label>
+                      <input type="file" id="wrappedPhotoFileInput" accept="image/*" required>
+                    </div>
+                    <div class="input-group">
+                      <label for="wrappedPhotoCaption">Photo Caption / Note</label>
+                      <input type="text" id="wrappedPhotoCaption" placeholder="e.g. College Fest, Our Trip, First Coffee...">
+                    </div>
+                    <div class="input-group">
+                      <label for="wrappedPhotoSlide">Attach to Story Slide</label>
+                      <select id="wrappedPhotoSlide">
+                        <option value="moments">✨ Picture Perfect Moments (Dedicated Slide)</option>
+                        <option value="genesis">Chapter 1: Our Journey Began</option>
+                        <option value="volume">Chapter 2: A Mountain of Memories</option>
+                        <option value="peak_day">Chapter 3: The Record Breaker Day</option>
+                        <option value="emojis">Chapter 4: The Emoji Hall of Fame</option>
+                        <option value="night_owls">Chapter 5: The Midnight Club</option>
+                        <option value="dynamics">Chapter 6: Lightning Speed Dynamics</option>
+                        <option value="topics">Chapter 7: Our Shared Universe</option>
+                        <option value="awards">Chapter 8: Friendship Persona Awards</option>
+                      </select>
+                    </div>
+                    <div id="statusUploadWrappedPhoto" class="form-status hidden"></div>
+                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top: 0.5rem;">Upload Photo</button>
+                  </form>
+                </div>
+
+              </div>
+
+              <!-- Uploaded Photos Grid -->
+              <div style="margin-top: 1.5rem;">
+                <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">🖼️ Uploaded Wrapped Photos Gallery</h4>
+                <div id="wrappedPhotosGallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem;">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="settings-card danger-card">
+              <h3>⚠️ Nuclear Wipe Data</h3>
+              <p>Completely erase all messages, memories, settings, and database records from this computer.</p>
+              <form id="formWipeData" class="settings-form">
+                <div class="input-group">
+                  <label for="wipePasswordConfirm">Enter Master Password to Confirm Wipe</label>
+                  <input type="password" id="wipePasswordConfirm" required>
+                </div>
+                <div id="wipeStatus" class="form-status hidden"></div>
+                <button type="submit" class="btn btn-danger">Erase All Data Permanently</button>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== MEMORY MODAL ==================== -->
+  <div id="memoryModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="memoryModalTitle">❤️ Add to Memories</h3>
+        <button id="btnCloseMemoryModal" class="btn-close">&times;</button>
+      </div>
+      <form id="memoryModalForm">
+        <input type="hidden" id="modalMessageId">
+        <input type="hidden" id="modalMemoryId">
+
+        <div class="message-preview-box" id="modalMessagePreview">
+          <!-- Snippet shown here -->
+        </div>
+
+        <div class="input-group">
+          <label>Memory Category</label>
+          <div class="category-radio-group">
+            <label class="cat-radio-label"><input type="radio" name="modalCategory" value="special" checked> ❤️ Special</label>
+            <label class="cat-radio-label"><input type="radio" name="modalCategory" value="emotional"> 🥹 Emotional</label>
+            <label class="cat-radio-label"><input type="radio" name="modalCategory" value="funny"> 😂 Funny</label>
+            <label class="cat-radio-label"><input type="radio" name="modalCategory" value="difficult"> 😭 Difficult</label>
+            <label class="cat-radio-label"><input type="radio" name="modalCategory" value="birthday"> 🎂 Birthday</label>
+            <label class="cat-radio-label"><input type="radio" name="modalCategory" value="career"> 🎓 Career</label>
+            <label class="cat-radio-label"><input type="radio" name="modalCategory" value="friendship"> 🫂 Friendship</label>
+            <label class="cat-radio-label"><input type="radio" name="modalCategory" value="important"> ⭐ Important</label>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="modalMemoryNote">Personal Note / Reflection</label>
+          <textarea id="modalMemoryNote" rows="3" placeholder="Why is this moment special? Add your personal thoughts..."></textarea>
+        </div>
+
+        <div class="input-group">
+          <label for="modalMemoryTags">Tags (optional, comma separated)</label>
+          <input type="text" id="modalMemoryTags" placeholder="college, trip, placement, smile">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="btnDeleteMemoryInModal" class="btn btn-danger-outline hidden">Delete Memory</button>
+          <div class="modal-actions-right">
+            <button type="button" id="btnCancelMemoryModal" class="btn btn-outline">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Memory</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== WRAPPED SECRET PIN MODAL ==================== -->
+  <div id="wrappedPinModal" class="modal-backdrop hidden" style="z-index: 10040;">
+    <div class="modal-card" style="max-width: 380px; text-align: center; position: relative;">
+      <button id="btnCloseWrappedPinModal" class="btn-close" style="position: absolute; right: 1.2rem; top: 1.2rem;">&times;</button>
+      <div style="font-size: 2.2rem; margin-bottom: 0.3rem;">🔒</div>
+      <h3 id="wrappedPinTitle" style="font-size: 1.3rem; margin-bottom: 0.3rem;">Secret Wrapped Vault</h3>
+      <p id="wrappedPinDesc" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        Enter your secret PIN to unlock Vinu 💝 × Bhuu 🎀 Private Story & Photos.
+      </p>
+      <form id="formWrappedPin">
+        <div class="input-group">
+          <div class="password-input-wrap">
+            <input type="password" id="inputWrappedPin" placeholder="••••" required autocomplete="off" style="text-align: center; font-size: 1.3rem; letter-spacing: 4px;">
+            <button type="button" class="btn-toggle-pwd" data-target="inputWrappedPin" title="Show/Hide PIN">👁️</button>
+          </div>
+        </div>
+        <div id="wrappedPinError" class="auth-error hidden" style="margin-bottom: 1rem;"></div>
+        <button type="submit" class="btn btn-primary btn-block">
+          <span id="wrappedPinSubmitText">Unlock & Open Wrapped</span> 🎁
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== WRAPPED DIRECT ADD PHOTO MODAL ==================== -->
+  <div id="wrappedAddPhotoModal" class="modal-backdrop hidden" style="z-index: 10060;">
+    <div class="modal-card" style="max-width: 420px; position: relative;">
+      <button id="btnCloseWrappedAddPhotoModal" class="btn-close" style="position: absolute; right: 1.2rem; top: 1.2rem;">&times;</button>
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+        <span style="font-size: 1.6rem;">📸</span>
+        <h3 style="margin: 0; font-size: 1.25rem;">Add Photo to Secret Vault</h3>
+      </div>
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.2rem;">
+        Add a private photo of Vinu 💝 & Bhuu 🎀 with an optional caption.
+      </p>
+
+      <form id="formDirectWrappedPhoto">
+        <div class="input-group">
+          <label for="directWrappedPhotoFile">Select Photo (JPG, PNG, WEBP)</label>
+          <input type="file" id="directWrappedPhotoFile" accept="image/*" required>
+        </div>
+
+        <div id="directPhotoPreviewBox" class="hidden" style="margin-bottom: 1rem; text-align: center;">
+          <img id="directPhotoPreviewImg" src="" alt="Preview" style="max-height: 140px; max-width: 100%; border-radius: 8px; border: 1px solid var(--border-color); object-fit: contain;">
+        </div>
+
+        <div class="input-group">
+          <label for="directWrappedPhotoCaption">Caption / Memory Note</label>
+          <input type="text" id="directWrappedPhotoCaption" placeholder="e.g. Our special day, Trip memory, Coffee date...">
+        </div>
+
+        <div id="directPhotoStatus" class="form-status hidden"></div>
+
+        <div class="modal-actions" style="margin-top: 1.2rem;">
+          <button type="button" id="btnCancelDirectPhoto" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <span>Upload & Add to Story</span> 📸
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== FRIENDSHIP WRAPPED MODAL ==================== -->
+  <div id="wrappedModal" class="wrapped-modal-overlay hidden">
+    <div class="wrapped-story-wrapper">
+      
+      <!-- Story Progress Bars -->
+      <div class="wrapped-progress-container" id="wrappedProgressBars">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Header Controls -->
+      <div class="wrapped-top-controls">
+        <div class="wrapped-brand-label">✨ Vinu 💝 × Bhuu 🎀 Wrapped</div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <button id="btnWrappedAddPhoto" class="btn-wrapped-action" title="Add a personal photo directly to this story">
+            <span>📸 Add Photo</span>
+          </button>
+          <button id="btnWrappedClose" class="btn-close-wrapped">&times;</button>
+        </div>
+      </div>
+
+      <!-- Slide Card Content -->
+      <div class="wrapped-slide-card" id="wrappedSlideCard">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Tap Zones for Navigation -->
+      <div class="wrapped-tap-zone left" id="btnWrappedPrev" title="Previous Slide"></div>
+      <div class="wrapped-tap-zone right" id="btnWrappedNext" title="Next Slide"></div>
+
+      <!-- Confetti Container -->
+      <div class="wrapped-confetti-layer" id="wrappedConfettiContainer"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="toast hidden"></div>
+
+  <script src="/static/js/api.js?v=2.6"></script>
+  <script src="/static/js/charts.js?v=2.6"></script>
+  <script src="/static/js/components/chat.js?v=2.6"></script>
+  <script src="/static/js/components/search.js?v=2.6"></script>
+  <script src="/static/js/components/timeline.js?v=2.6"></script>
+  <script src="/static/js/components/memories.js?v=2.6"></script>
+  <script src="/static/js/components/stats.js?v=2.6"></script>
+  <script src="/static/js/components/evolution.js?v=2.6"></script>
+  <script src="/static/js/components/funny.js?v=2.6"></script>
+  <script src="/static/js/components/insights.js?v=2.6"></script>
+  <script src="/static/js/components/wrapped.js?v=2.6"></script>
+  <script src="/static/js/components/settings.js?v=2.6"></script>
+  <script src="/static/js/app.js?v=2.6"></script>
+</body>
+</html>
